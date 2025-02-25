@@ -1,0 +1,14 @@
+C:\Users\walla\source\EterLibrary\bin\Debug\net8.0\EterLibrary.deps.json
+C:\Users\walla\source\EterLibrary\bin\Debug\net8.0\EterLibrary.runtimeconfig.json
+C:\Users\walla\source\EterLibrary\bin\Debug\net8.0\EterLibrary.dll
+C:\Users\walla\source\EterLibrary\bin\Debug\net8.0\EterLibrary.pdb
+C:\Users\walla\source\EterLibrary\obj\Debug\net8.0\EterLibrary.csproj.AssemblyReference.cache
+C:\Users\walla\source\EterLibrary\obj\Debug\net8.0\EterLibrary.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\walla\source\EterLibrary\obj\Debug\net8.0\EterLibrary.AssemblyInfoInputs.cache
+C:\Users\walla\source\EterLibrary\obj\Debug\net8.0\EterLibrary.AssemblyInfo.cs
+C:\Users\walla\source\EterLibrary\obj\Debug\net8.0\EterLibrary.csproj.CoreCompileInputs.cache
+C:\Users\walla\source\EterLibrary\obj\Debug\net8.0\EterLibrary.dll
+C:\Users\walla\source\EterLibrary\obj\Debug\net8.0\refint\EterLibrary.dll
+C:\Users\walla\source\EterLibrary\obj\Debug\net8.0\EterLibrary.pdb
+C:\Users\walla\source\EterLibrary\obj\Debug\net8.0\EterLibrary.genruntimeconfig.cache
+C:\Users\walla\source\EterLibrary\obj\Debug\net8.0\ref\EterLibrary.dll
