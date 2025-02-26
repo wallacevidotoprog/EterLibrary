@@ -12,3 +12,4 @@ C:\Users\walla\source\EterLibrary\obj\Debug\net8.0\refint\EterLibrary.dll
 C:\Users\walla\source\EterLibrary\obj\Debug\net8.0\EterLibrary.pdb
 C:\Users\walla\source\EterLibrary\obj\Debug\net8.0\EterLibrary.genruntimeconfig.cache
 C:\Users\walla\source\EterLibrary\obj\Debug\net8.0\ref\EterLibrary.dll
+C:\Users\walla\source\EterLibrary\obj\Debug\net8.0\EterLibrary.sourcelink.json

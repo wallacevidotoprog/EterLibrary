@@ -26,5 +26,8 @@ namespace EterLibrary.Domain.Entities.DbModels
 
 		public ICollection<MedControlDbModel> MedControl { get; set; } = new List<MedControlDbModel>();
 
+
+		
+
 	}
 }

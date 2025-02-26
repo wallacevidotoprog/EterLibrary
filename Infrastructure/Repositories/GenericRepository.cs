@@ -1,22 +1,24 @@
 ﻿using EterLibrary.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace EterLibrary.Infrastructure.Repositories
 {
-	public class GenericRepository<T> : IGenericRepository<T> where T : class
+	public abstract class GenericRepository<T> : IGenericRepository<T> where T : class
 	{
 		public readonly DatabaseContext _context;
 		public readonly DbSet<T> _dbSet;
 
-		public GenericRepository(/*DatabaseContext context*/)
+		public GenericRepository()
 		{
 			_context = new DatabaseContext();
-			//_context = context ?? throw new ArgumentNullException(nameof(context));
 			_dbSet = _context.Set<T>();
 		}
-		public async Task AddAsync(T entity)
+		public async Task<T> AddAsync(T entity)
 		{
-			await _dbSet.AddAsync(entity);
+			var e = await _dbSet.AddAsync(entity);
+			await _context.SaveChangesAsync();
+			return e.Entity;
 		}
 
 		public async Task<IEnumerable<T>> GetAllAsync()
@@ -28,6 +30,18 @@ namespace EterLibrary.Infrastructure.Repositories
 		{
 			var entity = await _dbSet.FindAsync(id);
 			return entity ?? throw new KeyNotFoundException($"Registro com ID {id} não encontrado.");
+		}
+
+		public async Task<IEnumerable<T>> GetIncudeAsync(params Expression<Func<T, object>>[] includes)
+		{
+			IQueryable<T> query = _dbSet;
+
+			foreach (var include in includes)
+			{
+				query = query.Include(include);
+			}
+
+			return await query.ToListAsync();
 		}
 
 		public async Task RemoveAsync(int id)
