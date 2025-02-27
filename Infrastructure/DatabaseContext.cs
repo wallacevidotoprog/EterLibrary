@@ -10,6 +10,30 @@ namespace EterLibrary.Infrastructure
 			optionsBuilder.UseSqlite("Data Source=meuBanco.db");
 		}
 
+		public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+		{
+			var entries = ChangeTracker.Entries()
+				.Where(e => e.Entity is BaseDbModal && (
+						e.State == EntityState.Added
+						|| e.State == EntityState.Modified));
+
+			foreach (var entityEntry in entries)
+			{
+				var entity = (BaseDbModal)entityEntry.Entity;
+
+				if (entityEntry.State == EntityState.Added)
+				{
+					entity.CREATE_AT = DateTime.Now;
+				}
+				else
+				{
+					entity.UPDATE_AT = DateTime.Now;
+				}
+			}
+
+			return base.SaveChangesAsync(cancellationToken);
+		}
+
 		public DbSet<CategoryDbModal> Categoria { get; set; }
 		public DbSet<AddressClienteDbModel> Address { get; set; }
 		public DbSet<ClientDbModel> Client { get; set; }
@@ -48,6 +72,11 @@ namespace EterLibrary.Infrastructure
 				.HasOne(x => x.UserModel)
 				.WithMany(x => x.Vality)
 				.HasForeignKey(x => x.ID_USER);
+
+			modelBuilder.Entity<ProductValidadeDbModal>()
+				.HasOne(x => x.Vality)
+				.WithMany(x => x.ProductValidades)
+				.HasForeignKey(x => x.ID_VALIDADE);
 
 			modelBuilder.Entity<CategoryDbModal>()
 				.HasOne(x => x.UserModel)

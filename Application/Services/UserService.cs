@@ -29,28 +29,29 @@ namespace EterLibrary.Application.Services
 			await _userRepository.UpdateAsync(user);
 		}
 
-		public async Task<IEnumerable<UserDbModel>> GetAllAsync()
-		{
-			return await _userRepository.GetAllAsync();
-		}
-
-		public async Task<UserDbModel> GetByIdAsync(int id)
-		{
-			return await _userRepository.GetByIdAsync(id);
-		}
 		public async Task<IEnumerable<UserDbModel>> GetAllIncudeAsync()
 		{
 			return await _userRepository.GetAllIncudeAsync();
-		}
-
-		public async Task<IEnumerable<UserDbModel>> GetIncudeAsync(params Expression<Func<UserDbModel, object>>[] includes)
-		{
-			return await _userRepository.GetIncudeAsync(includes);
-		}
+		}		
 
 		public async Task<UserDbModel> GetIncudeAsync(long? id = null)
 		{
 			return await _userRepository.GetIncudeAsync(id);
+		}		
+
+		public async Task<IEnumerable<UserDbModel>> GetAllAsync(Expression<Func<UserDbModel, bool>>? filter = null, params Expression<Func<UserDbModel, object>>[]? includes)
+		{
+			return await _userRepository.GetAllAsync(filter,includes);
+		}
+
+		public async Task<IEnumerable<UserDbModel>> GetIncudeAsync(Expression<Func<UserDbModel, bool>>? filter = null, params Expression<Func<UserDbModel, object>>[] includes)
+		{
+			return await _userRepository.GetIncudeAsync(filter,includes);
+		}
+
+		public async Task<UserDbModel> GetByAsync(Expression<Func<UserDbModel, bool>>? filter = null, params Expression<Func<UserDbModel, object>>[]? includes)
+		{
+			return await _userRepository.GetByAsync(filter,includes);
 		}
 	}
 }

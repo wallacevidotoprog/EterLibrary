@@ -6,5 +6,7 @@
 		public DateTime? DATE { get; set; }
 
 		public UserDbModel? UserModel { get; set; }
+
+		public ICollection<ProductValidadeDbModal> ProductValidades = new List<ProductValidadeDbModal>();
 	}
 }

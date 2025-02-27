@@ -21,24 +21,55 @@ namespace EterLibrary.Infrastructure.Repositories
 			return e.Entity;
 		}
 
-		public async Task<IEnumerable<T>> GetAllAsync()
-		{
-			return await _dbSet.ToListAsync();
-		}
-
-		public async Task<T> GetByIdAsync(int id)
-		{
-			var entity = await _dbSet.FindAsync(id);
-			return entity ?? throw new KeyNotFoundException($"Registro com ID {id} não encontrado.");
-		}
-
-		public async Task<IEnumerable<T>> GetIncudeAsync(params Expression<Func<T, object>>[] includes)
+		public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null, params Expression<Func<T, object>>[]? includes)
 		{
 			IQueryable<T> query = _dbSet;
 
-			foreach (var include in includes)
+			if (includes != null)
 			{
-				query = query.Include(include);
+				foreach (var include in includes)
+				{
+					query = query.Include(include);
+				}
+			}
+			if (filter != null)
+			{
+				query = query.Where(filter);
+			}
+			return await query.ToListAsync();
+		}
+
+		public async Task<T> GetByAsync(Expression<Func<T, bool>>? filter = null, params Expression<Func<T, object>>[]? includes)
+		{
+			IQueryable<T> query = _dbSet;
+
+			if (includes != null)
+			{
+				foreach (var include in includes)
+				{
+					query = query.Include(include);
+				}
+			}
+			var entity = filter != null ? await _dbSet.FirstOrDefaultAsync(filter) : await query.FirstOrDefaultAsync();
+
+			return entity ?? throw new KeyNotFoundException($"Registro não encontrado.");
+		}
+
+		public async Task<IEnumerable<T>> GetIncudeAsync(Expression<Func<T, bool>>? filter = null, params Expression<Func<T, object>>[] includes)
+		{
+			IQueryable<T> query = _dbSet;
+
+			if (includes != null)
+			{
+				foreach (var include in includes)
+				{
+					query = query.Include(include);
+				}
+			}
+
+			if (filter != null)
+			{
+				query = query.Where(filter);
 			}
 
 			return await query.ToListAsync();
@@ -46,7 +77,7 @@ namespace EterLibrary.Infrastructure.Repositories
 
 		public async Task RemoveAsync(int id)
 		{
-			var entity = await GetByIdAsync(id);
+			var entity = await GetByAsync(e => EF.Property<long?>(e, "ID") == id);
 			if (entity != null)
 			{
 				_dbSet.Remove(entity);
