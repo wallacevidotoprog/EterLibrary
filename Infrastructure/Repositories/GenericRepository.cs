@@ -41,6 +41,8 @@ namespace EterLibrary.Infrastructure.Repositories
 
 		public async Task<T> GetByAsync(Expression<Func<T, bool>>? filter = null, params Expression<Func<T, object>>[]? includes)
 		{
+
+
 			IQueryable<T> query = _dbSet;
 
 			if (includes != null)
@@ -50,7 +52,11 @@ namespace EterLibrary.Infrastructure.Repositories
 					query = query.Include(include);
 				}
 			}
-			var entity = filter != null ? await _dbSet.FirstOrDefaultAsync(filter) : await query.FirstOrDefaultAsync();
+			if (filter != null)
+			{
+				query = query.Where(filter);
+			}
+			var entity = query.FirstOrDefault();// = filter != null ? await _dbSet.FirstOrDefaultAsync(filter) : await query.FirstOrDefaultAsync();
 
 			return entity ?? throw new KeyNotFoundException($"Registro não encontrado.");
 		}
