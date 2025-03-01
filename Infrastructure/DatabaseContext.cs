@@ -159,6 +159,11 @@ namespace EterLibrary.Infrastructure
 			.WithMany(x => x.Manipulation)
 			.HasForeignKey(x => x.ID_MODOENTREGA);
 
+			modelBuilder.Entity<MedManipulationDbModal>()
+			.HasOne(x => x.Manipulation)
+			.WithMany(x => x.MedManipulation)
+			.HasForeignKey(x => x.ID_MANIPULADOS);
+
 
 
 		}
