@@ -54,9 +54,9 @@ namespace EterLibrary.Application.Services
 			return await _userRepository.GetByAsync(filter, includes);
 		}
 
-		public async Task AddOrUpdateAsync(UserDbModel entity)
+		public async Task<UserDbModel> AddOrUpdateAsync(UserDbModel entity)
 		{
-			await _userRepository.AddOrUpdateAsync(entity);
+			return await _userRepository.AddOrUpdateAsync(entity);
 		}
 	}
 }

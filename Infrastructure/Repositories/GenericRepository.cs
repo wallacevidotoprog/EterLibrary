@@ -99,10 +99,10 @@ namespace EterLibrary.Infrastructure.Repositories
 			await _context.SaveChangesAsync();
 		}
 
-		public async Task AddOrUpdateAsync(T entity)
+		public async Task<T> AddOrUpdateAsync(T entity)
 		{
 			var key = _context.Model.FindEntityType(typeof(T))?
-		.FindPrimaryKey()?.Properties.FirstOrDefault();
+				.FindPrimaryKey()?.Properties.FirstOrDefault();
 
 			if (key == null)
 			{
@@ -115,7 +115,7 @@ namespace EterLibrary.Infrastructure.Repositories
 			{
 				var addedEntity = await _dbSet.AddAsync(entity);
 				await _context.SaveChangesAsync();
-				//return addedEntity.Entity;
+				return addedEntity.Entity;
 			}
 			else
 			{
@@ -126,32 +126,69 @@ namespace EterLibrary.Infrastructure.Repositories
 				{
 					var addedEntity = await _dbSet.AddAsync(entity);
 					await _context.SaveChangesAsync();
-					//return addedEntity.Entity;
+					return addedEntity.Entity;
 				}
 				else
 				{
 					_context.Entry(existingEntity).CurrentValues.SetValues(entity);
 
-					// Atualiza os relacionamentos manualmente
-					var navigationProperties = _context.Entry(existingEntity).Navigations
-						.Where(n => n.Metadata is INavigation)
-						.Select(n => n.Metadata.Name);
-
-					foreach (var navProp in navigationProperties)
+					// 🔹 Atualiza os relacionamentos corretamente (evita erro de coleção)
+					foreach (var navigation in _context.Entry(existingEntity).Navigations)
 					{
-						var newRelatedValue = _context.Entry(entity).Reference(navProp).CurrentValue;
-						if (newRelatedValue != null)
+						var navigationMetadata = navigation.Metadata;
+
+						if (navigationMetadata is INavigation navMeta)
 						{
-							_context.Entry(existingEntity).Reference(navProp).CurrentValue = newRelatedValue;
+							// Obtém o novo valor da entidade passada como parâmetro
+							var newRelatedValue = _context.Entry(entity).Navigation(navMeta.Name).CurrentValue;
+
+							if (newRelatedValue != null)
+							{
+								if (navMeta.IsCollection) // 🔥 Se for uma coleção, usa Collection()
+								{
+									var collectionEntry = _context.Entry(existingEntity).Collection(navMeta.Name);
+									collectionEntry.Load(); // Carrega os dados antes de modificar
+									collectionEntry.CurrentValue = (IEnumerable<object>)newRelatedValue;
+								}
+								else // 🔥 Se for uma referência única, usa Reference()
+								{
+									var referenceEntry = _context.Entry(existingEntity).Reference(navMeta.Name);
+									referenceEntry.CurrentValue = newRelatedValue;
+								}
+							}
 						}
 					}
 
+					//foreach (var navigation in _context.Entry(existingEntity).Navigations)
+					//{
+					//	var navigationMetadata = navigation.Metadata;
+
+					//	if (navigationMetadata is INavigation navMeta)
+					//	{
+					//		var newRelatedValue = _context.Entry(entity).Property(navMeta.Name).CurrentValue;
+
+					//		if (newRelatedValue != null)
+					//		{
+					//			if (navMeta.IsCollection) // 🔥 Se for uma coleção, usa Collection()
+					//			{
+					//				var collectionEntry = _context.Entry(existingEntity).Collection(navMeta.Name);
+					//				collectionEntry.Load();
+					//				collectionEntry.CurrentValue = (IEnumerable<object>)newRelatedValue;
+					//			}
+					//			else // 🔥 Se for uma relação única, usa Reference()
+					//			{
+					//				var referenceEntry = _context.Entry(existingEntity).Reference(navMeta.Name);
+					//				referenceEntry.CurrentValue = newRelatedValue;
+					//			}
+					//		}
+					//	}
+					//}
+
 					await _context.SaveChangesAsync();
-					//return existingEntity;
+					return existingEntity;
 				}
 			}
 		}
-
 
 
 	}

@@ -11,6 +11,6 @@ namespace EterLibrary.Domain.Interfaces
 		Task UpdateAsync(T entity);
 		Task RemoveAsync(int id);
 
-		Task AddOrUpdateAsync(T entity);
+		Task<T> AddOrUpdateAsync(T entity);
 	}
 }
