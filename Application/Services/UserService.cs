@@ -32,26 +32,31 @@ namespace EterLibrary.Application.Services
 		public async Task<IEnumerable<UserDbModel>> GetAllIncudeAsync()
 		{
 			return await _userRepository.GetAllIncudeAsync();
-		}		
+		}
 
 		public async Task<UserDbModel> GetIncudeAsync(long? id = null)
 		{
 			return await _userRepository.GetIncudeAsync(id);
-		}		
+		}
 
 		public async Task<IEnumerable<UserDbModel>> GetAllAsync(Expression<Func<UserDbModel, bool>>? filter = null, params Expression<Func<UserDbModel, object>>[]? includes)
 		{
-			return await _userRepository.GetAllAsync(filter,includes);
+			return await _userRepository.GetAllAsync(filter, includes);
 		}
 
 		public async Task<IEnumerable<UserDbModel>> GetIncudeAsync(Expression<Func<UserDbModel, bool>>? filter = null, params Expression<Func<UserDbModel, object>>[] includes)
 		{
-			return await _userRepository.GetIncudeAsync(filter,includes);
+			return await _userRepository.GetIncudeAsync(filter, includes);
 		}
 
 		public async Task<UserDbModel> GetByAsync(Expression<Func<UserDbModel, bool>>? filter = null, params Expression<Func<UserDbModel, object>>[]? includes)
 		{
-			return await _userRepository.GetByAsync(filter,includes);
+			return await _userRepository.GetByAsync(filter, includes);
+		}
+
+		public async Task AddOrUpdateAsync(UserDbModel entity)
+		{
+			await _userRepository.AddOrUpdateAsync(entity);
 		}
 	}
 }

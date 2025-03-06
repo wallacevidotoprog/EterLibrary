@@ -37,6 +37,9 @@ namespace EterLibrary.Domain.Entities.DbModels
 		public DeliveryMethodDbModal? DeliveryMethod { get; set; }
 
 
+		
+
+
 	}
 
 

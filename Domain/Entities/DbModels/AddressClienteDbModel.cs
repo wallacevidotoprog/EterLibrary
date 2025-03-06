@@ -22,5 +22,10 @@
 
 		public ICollection<MedControlDbModel> MedControl { get; set; } = new List<MedControlDbModel>();
 
+		public override string ToString()
+		{
+			return $"{PLACE}, {NUMBER}, {ZONE}, {CITY} - {UF}";
+		}
+
 	}
 }

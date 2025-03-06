@@ -24,6 +24,7 @@ namespace EterLibrary.Infrastructure
 				if (entityEntry.State == EntityState.Added)
 				{
 					entity.CREATE_AT = DateTime.Now;
+					entity.UPDATE_AT = DateTime.Now;
 				}
 				else
 				{
@@ -107,7 +108,8 @@ namespace EterLibrary.Infrastructure
 			modelBuilder.Entity<AddressClienteDbModel>()
 				.HasOne(x => x.Client)
 				.WithMany(x => x.AddressCliente)
-				.HasForeignKey(x => x.ID_CLIENT);
+				.HasForeignKey(x => x.ID_CLIENT);		
+
 
 			modelBuilder.Entity<ManipulationDbModel>()
 				.HasOne(x => x.Client)
@@ -163,6 +165,8 @@ namespace EterLibrary.Infrastructure
 			.HasOne(x => x.Manipulation)
 			.WithMany(x => x.MedManipulation)
 			.HasForeignKey(x => x.ID_MANIPULADOS);
+
+
 
 
 

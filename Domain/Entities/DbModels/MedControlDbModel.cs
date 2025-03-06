@@ -1,11 +1,16 @@
-﻿namespace EterLibrary.Domain.Entities.DbModels
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace EterLibrary.Domain.Entities.DbModels
 {
 	public class MedControlDbModel : BaseDbModal
 	{
+		[ForeignKey("Client")]
 		public long? ID_CLIENT { get; set; }
 
+		[ForeignKey("AddressCliente")]
 		public long? ID_ADDRESS { get; set; }
 
+		[ForeignKey("UserPossition")]
 		public long? ID_USER { get; set; }
 
 		public int? CODIGO { get; set; }
