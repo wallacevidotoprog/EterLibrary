@@ -77,7 +77,8 @@ namespace EterLibrary.Infrastructure
 			modelBuilder.Entity<ProductValidadeDbModal>()
 				.HasOne(x => x.Vality)
 				.WithMany(x => x.ProductValidades)
-				.HasForeignKey(x => x.ID_VALIDADE);
+				.HasForeignKey(x => x.ID_VALIDADE)
+				.OnDelete(DeleteBehavior.Cascade);
 
 			modelBuilder.Entity<CategoryDbModal>()
 				.HasOne(x => x.UserModel)
@@ -93,7 +94,7 @@ namespace EterLibrary.Infrastructure
 				.HasOne(c => c.UserModel_a)
 				.WithMany(x => x.ControlReqNota_a)
 				.HasForeignKey(c => c.AUTHOR)
-				.OnDelete(DeleteBehavior.Restrict);
+				.OnDelete(DeleteBehavior.Cascade);
 
 			modelBuilder.Entity<MedControlDbModel>()
 				.HasOne(x => x.UserModel)
@@ -108,7 +109,7 @@ namespace EterLibrary.Infrastructure
 			modelBuilder.Entity<AddressClienteDbModel>()
 				.HasOne(x => x.Client)
 				.WithMany(x => x.AddressCliente)
-				.HasForeignKey(x => x.ID_CLIENT);		
+				.HasForeignKey(x => x.ID_CLIENT);
 
 
 			modelBuilder.Entity<ManipulationDbModel>()
@@ -164,7 +165,8 @@ namespace EterLibrary.Infrastructure
 			modelBuilder.Entity<MedManipulationDbModal>()
 			.HasOne(x => x.Manipulation)
 			.WithMany(x => x.MedManipulation)
-			.HasForeignKey(x => x.ID_MANIPULADOS);
+			.HasForeignKey(x => x.ID_MANIPULADOS)
+			.OnDelete(DeleteBehavior.Cascade);
 
 
 

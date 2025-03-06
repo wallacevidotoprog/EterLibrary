@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EterLibrary")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fe7d10dbe33f751b45152e4915d57e2d14c745ae")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+63e3e8fbb07d0f6b83836bdd89f02c23cbd75c11")]
 [assembly: System.Reflection.AssemblyProductAttribute("EterLibrary")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EterLibrary")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
