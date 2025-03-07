@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EterLibrary")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+693301584e3dc433ef690c2929ac8fd092bc39a9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+660ae3e295b7f21a1a4698851e10d29686ff66ac")]
 [assembly: System.Reflection.AssemblyProductAttribute("EterLibrary")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EterLibrary")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
