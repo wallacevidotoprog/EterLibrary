@@ -24,7 +24,21 @@
 
 		public override string ToString()
 		{
-			return $"{PLACE}, {NUMBER}, {ZONE}, {CITY} - {UF}";
+			return
+				(!string.IsNullOrEmpty(PLACE) ? PLACE : string.Empty) +
+				(NUMBER != null ? ", " + NUMBER.ToString() : string.Empty) +
+				(!string.IsNullOrEmpty(ZONE) ? ", " + ZONE : string.Empty) +
+				(!string.IsNullOrEmpty(CITY) ? ", " + CITY : string.Empty) +
+				(!string.IsNullOrEmpty(UF) ? " - " + UF : string.Empty);
+		}
+		public string ToStringDrop()
+		{
+			return
+				(!string.IsNullOrEmpty(PLACE) ? PLACE : string.Empty) +
+				(NUMBER != null ? ", " + NUMBER.ToString() : string.Empty) + 
+				(!string.IsNullOrEmpty(ZONE) ? ", " + ZONE : string.Empty) +
+				(!string.IsNullOrEmpty(CITY) ? ", " + CITY : string.Empty) +
+				(!string.IsNullOrEmpty(UF) ? " - " + UF : string.Empty);
 		}
 
 	}
