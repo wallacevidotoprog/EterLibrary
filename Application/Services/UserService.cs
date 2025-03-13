@@ -24,9 +24,9 @@ namespace EterLibrary.Application.Services
 			await _userRepository.RemoveAsync(id);
 		}
 
-		public async Task UpdateAsync(UserDbModel user)
+		public async Task<UserDbModel> UpdateAsync(UserDbModel user)
 		{
-			await _userRepository.UpdateAsync(user);
+		 	return await _userRepository.UpdateAsync(user);
 		}
 
 		public async Task<IEnumerable<UserDbModel>> GetAllIncudeAsync()

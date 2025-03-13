@@ -8,7 +8,7 @@ namespace EterLibrary.Domain.Interfaces
 		Task<IEnumerable<T>> GetIncudeAsync(Expression<Func<T, bool>>? filter = null, params Expression<Func<T, object>>[] includes);
 		Task<T> GetByAsync(Expression<Func<T, bool>>? filter = null, params Expression<Func<T, object>>[]? includes);
 		Task<T> AddAsync(T entity);
-		Task UpdateAsync(T entity);
+		Task<T> UpdateAsync(T entity);
 		Task RemoveAsync(int id);
 
 		Task<T> AddOrUpdateAsync(T entity);

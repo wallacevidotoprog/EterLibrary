@@ -1,7 +1,10 @@
-﻿namespace EterLibrary.Domain.Entities.DbModels
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace EterLibrary.Domain.Entities.DbModels
 {
 	public class AddressClienteDbModel : BaseDbModal
 	{
+		[ForeignKey("ID_CLIENT")]
 		public long? ID_CLIENT { get; set; }
 
 		public string? PLACE { get; set; }
@@ -35,7 +38,7 @@
 		{
 			return
 				(!string.IsNullOrEmpty(PLACE) ? PLACE : string.Empty) +
-				(NUMBER != null ? ", " + NUMBER.ToString() : string.Empty) + 
+				(NUMBER != null ? ", " + NUMBER.ToString() : string.Empty) +
 				(!string.IsNullOrEmpty(ZONE) ? ", " + ZONE : string.Empty) +
 				(!string.IsNullOrEmpty(CITY) ? ", " + CITY : string.Empty) +
 				(!string.IsNullOrEmpty(UF) ? " - " + UF : string.Empty);

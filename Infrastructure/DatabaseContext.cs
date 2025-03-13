@@ -168,7 +168,10 @@ namespace EterLibrary.Infrastructure
 			.HasForeignKey(x => x.ID_MANIPULADOS)
 			.OnDelete(DeleteBehavior.Cascade);
 
-
+			modelBuilder.Entity<ClientDbModel>()
+				.HasMany(c => c.AddressCliente)
+				.WithOne(a => a.Client)
+				.HasForeignKey(a => a.ID_CLIENT);
 
 
 

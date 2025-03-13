@@ -93,10 +93,36 @@ namespace EterLibrary.Infrastructure.Repositories
 			}
 		}
 
-		public async Task UpdateAsync(T entity)
+		public async Task<T> UpdateAsync(T entity)
 		{
-			_dbSet.Update(entity);
+			var key = _context.Model.FindEntityType(typeof(T))?
+				.FindPrimaryKey()?.Properties.FirstOrDefault();
+
+			if (key == null)
+			{
+				throw new InvalidOperationException("A entidade não possui chave primária definida.");
+			}
+
+			var keyValue = key.PropertyInfo?.GetValue(entity);
+			if (keyValue == null || keyValue.Equals(Activator.CreateInstance(key.PropertyInfo.PropertyType)))
+			{
+				throw new InvalidOperationException("A entidade precisa ter um ID válido para ser atualizada.");
+			}
+
+			// Verifica se a entidade já está sendo rastreada
+			var existingEntity = await _dbSet.FindAsync(keyValue);
+			if (existingEntity != null)
+			{
+				// Desanexa a entidade rastreada
+				_context.Entry(existingEntity).State = EntityState.Detached;
+			}
+
+			// Atualiza os valores
+			_context.Entry(entity).State = EntityState.Modified;
+
 			await _context.SaveChangesAsync();
+
+			return await _dbSet.FindAsync(keyValue);
 		}
 
 		public async Task<T> AddOrUpdateAsync(T entity)
@@ -111,84 +137,62 @@ namespace EterLibrary.Infrastructure.Repositories
 
 			var keyValue = key.PropertyInfo?.GetValue(entity);
 
-			if (keyValue == null || Convert.ToInt64(keyValue) == 0) // Considera 0 como entidade nova
+			// Se a chave for nula ou zero, adicionamos como novo registro
+			if (keyValue == null || keyValue.Equals(Activator.CreateInstance(key.PropertyInfo.PropertyType)))
 			{
 				var addedEntity = await _dbSet.AddAsync(entity);
 				await _context.SaveChangesAsync();
 				return addedEntity.Entity;
 			}
-			else
+
+
+
+			// Busca a entidade existente no banco
+			var existingEntity = await _dbSet.FindAsync(keyValue);
+
+			if (existingEntity == null)
 			{
-				var existingEntity = await _dbSet
-					.FirstOrDefaultAsync(e => EF.Property<long?>(e, key.Name) == (long?)keyValue);
+				var addedEntity = await _dbSet.AddAsync(entity);
+				await _context.SaveChangesAsync();
+				return addedEntity.Entity;
+			}
 
-				if (existingEntity == null)
-				{
-					var addedEntity = await _dbSet.AddAsync(entity);
-					await _context.SaveChangesAsync();
-					return addedEntity.Entity;
-				}
-				else
-				{
-					_context.Entry(existingEntity).CurrentValues.SetValues(entity);
+			// Atualiza os valores da entidade existente
+			_context.Entry(existingEntity).CurrentValues.SetValues(entity);
 
-					// 🔹 Atualiza os relacionamentos corretamente (evita erro de coleção)
-					foreach (var navigation in _context.Entry(existingEntity).Navigations)
+			if (existingEntity == null)
+			{
+				throw new InvalidOperationException("Entidade não encontrada para atualização.");
+			}
+
+			// Atualiza os relacionamentos corretamente
+			foreach (var navigation in _context.Entry(existingEntity).Navigations)
+			{
+				if (navigation.Metadata is INavigation navMeta)
+				{
+					var newRelatedValue = _context.Entry(entity).Navigation(navMeta.Name).CurrentValue;
+
+					if (newRelatedValue != null)
 					{
-						var navigationMetadata = navigation.Metadata;
-
-						if (navigationMetadata is INavigation navMeta)
+						if (navMeta.IsCollection)
 						{
-							// Obtém o novo valor da entidade passada como parâmetro
-							var newRelatedValue = _context.Entry(entity).Navigation(navMeta.Name).CurrentValue;
-
-							if (newRelatedValue != null)
-							{
-								if (navMeta.IsCollection) // 🔥 Se for uma coleção, usa Collection()
-								{
-									var collectionEntry = _context.Entry(existingEntity).Collection(navMeta.Name);
-									collectionEntry.Load(); // Carrega os dados antes de modificar
-									collectionEntry.CurrentValue = (IEnumerable<object>)newRelatedValue;
-								}
-								else // 🔥 Se for uma referência única, usa Reference()
-								{
-									var referenceEntry = _context.Entry(existingEntity).Reference(navMeta.Name);
-									referenceEntry.CurrentValue = newRelatedValue;
-								}
-							}
+							var collectionEntry = _context.Entry(existingEntity).Collection(navMeta.Name);
+							await collectionEntry.LoadAsync(); // ⚡ Assegura que a coleção foi carregada
+							collectionEntry.CurrentValue = (IEnumerable<object>)newRelatedValue;
+						}
+						else
+						{
+							var referenceEntry = _context.Entry(existingEntity).Reference(navMeta.Name);
+							referenceEntry.CurrentValue = newRelatedValue;
 						}
 					}
-
-					//foreach (var navigation in _context.Entry(existingEntity).Navigations)
-					//{
-					//	var navigationMetadata = navigation.Metadata;
-
-					//	if (navigationMetadata is INavigation navMeta)
-					//	{
-					//		var newRelatedValue = _context.Entry(entity).Property(navMeta.Name).CurrentValue;
-
-					//		if (newRelatedValue != null)
-					//		{
-					//			if (navMeta.IsCollection) // 🔥 Se for uma coleção, usa Collection()
-					//			{
-					//				var collectionEntry = _context.Entry(existingEntity).Collection(navMeta.Name);
-					//				collectionEntry.Load();
-					//				collectionEntry.CurrentValue = (IEnumerable<object>)newRelatedValue;
-					//			}
-					//			else // 🔥 Se for uma relação única, usa Reference()
-					//			{
-					//				var referenceEntry = _context.Entry(existingEntity).Reference(navMeta.Name);
-					//				referenceEntry.CurrentValue = newRelatedValue;
-					//			}
-					//		}
-					//	}
-					//}
-
-					await _context.SaveChangesAsync();
-					return existingEntity;
 				}
 			}
+
+			await _context.SaveChangesAsync();
+			return existingEntity;
 		}
+
 
 
 	}
