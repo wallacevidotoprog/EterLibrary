@@ -7,7 +7,7 @@ namespace EterLibrary.Infrastructure
 	{
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
-			optionsBuilder.UseSqlite("Data Source=meuBanco.db");
+			optionsBuilder.UseSqlite("Data Source=DADOS/db.db");
 		}
 
 		public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
