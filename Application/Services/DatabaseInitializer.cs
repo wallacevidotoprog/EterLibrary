@@ -30,6 +30,13 @@ namespace EterLibrary.Application.Services
 				context.SaveChanges();
 			}
 
+			if (!context.Categoria.Any())
+			{
+				context.Categoria.AddRange(new List<CategoryDbModal> { new CategoryDbModal { ID = 1, NAME = "SEM CATEGORIA" } });
+
+				context.SaveChanges();
+			}
+
 			if (!context.UserPossition.Any())
 			{
 				context.UserPossition.AddRange(new List<UserDbModel> { new UserDbModel { ID_LOJA = 0, NOME = "DEVELOPER", PASS = PasswordHelper.HasPassword("@321"), ID_FUNCAO = 150 } });
@@ -37,7 +44,40 @@ namespace EterLibrary.Application.Services
 				context.SaveChanges();
 			}
 
+			if (!context.Payment.Any())
+			{
+				context.Payment.AddRange(new List<PaymentDbModal>
+				{
+					new PaymentDbModal { NAME = "CARTÃO" },
+						new PaymentDbModal { NAME = "PIX" },
+							new PaymentDbModal { NAME = "DINHEIRO" },
+								new PaymentDbModal { NAME = "CONVENIO" },
+									new PaymentDbModal { NAME = "OUTROS" },
+				});
+				context.SaveChanges();
+			}
 
+			if (!context.Situation.Any())
+			{
+				context.Situation.AddRange(new List<SituationDbModal>
+				{
+					new SituationDbModal { NAME = "A RECEBER" },
+						new SituationDbModal { NAME = "PAGO" },
+							new SituationDbModal { NAME = "NÃO INFORMADO" },
+				});
+				context.SaveChanges();
+			}
+
+			if (!context.DeliveryMethod.Any())
+			{
+				context.DeliveryMethod.AddRange(new List<DeliveryMethodDbModal>
+				{
+					new DeliveryMethodDbModal {     NAME = "A ENTREGAR NA RESIDÊNCIA DO CLIENTE" },
+						new DeliveryMethodDbModal {     NAME = "O CLIENTE VEM RETIRAR" },
+							new DeliveryMethodDbModal { NAME = "NÃO INFORMADO" },
+				});
+				context.SaveChanges();
+			}
 		}
 	}
 }
