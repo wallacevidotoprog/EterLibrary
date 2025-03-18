@@ -1,6 +1,5 @@
 ﻿using EterLibrary.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 using System.Linq.Expressions;
 
 namespace EterLibrary.Infrastructure.Repositories
@@ -25,7 +24,7 @@ namespace EterLibrary.Infrastructure.Repositories
 
 		public async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>>? filter = null, params Expression<Func<T, object>>[]? includes)
 		{
-			IQueryable<T> query = _dbSet;
+			IQueryable<T> query = _dbSet.AsNoTracking(); ;
 
 			if (includes != null)
 			{
@@ -45,7 +44,7 @@ namespace EterLibrary.Infrastructure.Repositories
 		{
 
 
-			IQueryable<T> query = _dbSet;
+			IQueryable<T> query = _dbSet.AsNoTracking(); ;
 
 			if (includes != null)
 			{
@@ -65,7 +64,7 @@ namespace EterLibrary.Infrastructure.Repositories
 
 		public async Task<IEnumerable<T>> GetIncudeAsync(Expression<Func<T, bool>>? filter = null, params Expression<Func<T, object>>[] includes)
 		{
-			IQueryable<T> query = _dbSet;
+			IQueryable<T> query = _dbSet.AsNoTracking(); ;
 
 			if (includes != null)
 			{
@@ -137,18 +136,26 @@ namespace EterLibrary.Infrastructure.Repositories
 
 			var keyValue = key.PropertyInfo?.GetValue(entity);
 
-			// Se a chave for nula ou zero, adicionamos como novo registro
 			if (keyValue == null || keyValue.Equals(Activator.CreateInstance(key.PropertyInfo.PropertyType)))
 			{
+				_context.Entry(entity).State = EntityState.Detached; // **Evita rastreamento duplicado**
 				var addedEntity = await _dbSet.AddAsync(entity);
 				await _context.SaveChangesAsync();
 				return addedEntity.Entity;
 			}
 
+			// **🔹 Evita erro de múltiplas instâncias rastreadas**
+			var existingTrackedEntity = _context.ChangeTracker.Entries<T>()
+				.FirstOrDefault(e => key.PropertyInfo.GetValue(e.Entity).Equals(keyValue));
 
+			if (existingTrackedEntity != null)
+			{
+				_context.Entry(existingTrackedEntity.Entity).State = EntityState.Detached;
+			}
 
-			// Busca a entidade existente no banco
-			var existingEntity = await _dbSet.FindAsync(keyValue);
+			// **🔹 Busca a entidade no banco SEM rastrear**
+			var entities = await _dbSet.AsNoTracking().ToListAsync();
+			var existingEntity = entities.FirstOrDefault(e => key.PropertyInfo.GetValue(e).Equals(keyValue));
 
 			if (existingEntity == null)
 			{
@@ -157,41 +164,131 @@ namespace EterLibrary.Infrastructure.Repositories
 				return addedEntity.Entity;
 			}
 
-			// Atualiza os valores da entidade existente
-			_context.Entry(existingEntity).CurrentValues.SetValues(entity);
-
-			if (existingEntity == null)
-			{
-				throw new InvalidOperationException("Entidade não encontrada para atualização.");
-			}
-
-			// Atualiza os relacionamentos corretamente
-			foreach (var navigation in _context.Entry(existingEntity).Navigations)
-			{
-				if (navigation.Metadata is INavigation navMeta)
-				{
-					var newRelatedValue = _context.Entry(entity).Navigation(navMeta.Name).CurrentValue;
-
-					if (newRelatedValue != null)
-					{
-						if (navMeta.IsCollection)
-						{
-							var collectionEntry = _context.Entry(existingEntity).Collection(navMeta.Name);
-							await collectionEntry.LoadAsync(); // ⚡ Assegura que a coleção foi carregada
-							collectionEntry.CurrentValue = (IEnumerable<object>)newRelatedValue;
-						}
-						else
-						{
-							var referenceEntry = _context.Entry(existingEntity).Reference(navMeta.Name);
-							referenceEntry.CurrentValue = newRelatedValue;
-						}
-					}
-				}
-			}
+			// **🔹 Atualiza a entidade corretamente**
+			_context.Entry(entity).State = EntityState.Modified;
+			_context.Entry(entity).CurrentValues.SetValues(existingEntity);
 
 			await _context.SaveChangesAsync();
-			return existingEntity;
+			return entity;
 		}
+
+
+		//public async Task<T> AddOrUpdateAsync(T entity)
+		//{
+		//	var key = _context.Model.FindEntityType(typeof(T))?
+		//		.FindPrimaryKey()?.Properties.FirstOrDefault();
+
+		//	if (key == null)
+		//	{
+		//		throw new InvalidOperationException("A entidade não possui chave primária definida.");
+		//	}
+
+		//	var keyValue = key.PropertyInfo?.GetValue(entity);
+
+		//	// **🔹 Se a chave for nula ou zero, tratamos como novo registro**
+		//	if (keyValue == null || keyValue.Equals(Activator.CreateInstance(key.PropertyInfo.PropertyType)))
+		//	{
+		//		_context.Entry(entity).State = EntityState.Detached; // **⚡ Evita erro de rastreamento**
+		//		var addedEntity = await _dbSet.AddAsync(entity);
+		//		await _context.SaveChangesAsync();
+		//		return addedEntity.Entity;
+		//	}
+
+		//	// **🔹 Evita erro de múltiplas instâncias rastreadas**
+		//	var existingTrackedEntity = _context.ChangeTracker.Entries<T>()
+		//		.FirstOrDefault(e => e.Property(key.Name).CurrentValue.Equals(keyValue));
+
+		//	if (existingTrackedEntity != null)
+		//	{
+		//		_context.Entry(existingTrackedEntity.Entity).State = EntityState.Detached;
+		//	}
+
+		//	// **🔹 Busca a entidade no banco SEM rastrear**
+		//	var existingEntity = await _dbSet.AsNoTracking().FirstOrDefaultAsync(e => key.PropertyInfo.GetValue(e).Equals(keyValue));
+
+		//	if (existingEntity == null)
+		//	{
+		//		var addedEntity = await _dbSet.AddAsync(entity);
+		//		await _context.SaveChangesAsync();
+		//		return addedEntity.Entity;
+		//	}
+
+		//	// **🔹 Garante que o EF rastreie apenas UMA entidade**
+		//	_context.Entry(entity).State = EntityState.Modified;
+		//	_context.Entry(entity).CurrentValues.SetValues(existingEntity);
+
+		//	await _context.SaveChangesAsync();
+		//	return entity;
+		//}
+
+
+		//public async Task<T> AddOrUpdateAsync(T entity)
+		//{
+		//	var key = _context.Model.FindEntityType(typeof(T))?
+		//		.FindPrimaryKey()?.Properties.FirstOrDefault();
+
+		//	if (key == null)
+		//	{
+		//		throw new InvalidOperationException("A entidade não possui chave primária definida.");
+		//	}
+
+		//	var keyValue = key.PropertyInfo?.GetValue(entity);
+
+		//	// Se a chave for nula ou zero, adicionamos como novo registro
+		//	if (keyValue == null || keyValue.Equals(Activator.CreateInstance(key.PropertyInfo.PropertyType)))
+		//	{
+		//		var addedEntity = await _dbSet.AddAsync(entity);
+		//		await _context.SaveChangesAsync();
+		//		return addedEntity.Entity;
+		//	}
+
+
+
+		//	// Busca a entidade existente no banco
+		//	var existingEntity = await _dbSet.FindAsync(keyValue);
+
+		//	if (existingEntity == null)
+		//	{
+		//		var addedEntity = await _dbSet.AddAsync(entity);
+		//		await _context.SaveChangesAsync();
+		//		return addedEntity.Entity;
+		//	}
+
+		//	// Atualiza os valores da entidade existente
+		//	_context.Entry(existingEntity).CurrentValues.SetValues(entity);
+
+		//	if (existingEntity == null)
+		//	{
+		//		throw new InvalidOperationException("Entidade não encontrada para atualização.");
+		//	}
+
+		//	// Atualiza os relacionamentos corretamente
+		//	foreach (var navigation in _context.Entry(existingEntity).Navigations)
+		//	{
+		//		if (navigation.Metadata is INavigation navMeta)
+		//		{
+		//			var newRelatedValue = _context.Entry(entity).Navigation(navMeta.Name).CurrentValue;
+
+		//			if (newRelatedValue != null)
+		//			{
+		//				if (navMeta.IsCollection)
+		//				{
+		//					var collectionEntry = _context.Entry(existingEntity).Collection(navMeta.Name);
+		//					await collectionEntry.LoadAsync(); // ⚡ Assegura que a coleção foi carregada
+		//					collectionEntry.CurrentValue = (IEnumerable<object>)newRelatedValue;
+		//				}
+		//				else
+		//				{
+		//					var referenceEntry = _context.Entry(existingEntity).Reference(navMeta.Name);
+		//					referenceEntry.CurrentValue = newRelatedValue;
+		//				}
+		//			}
+		//		}
+		//	}
+
+		//	await _context.SaveChangesAsync();
+		//	return existingEntity;
+		//}
 
 
 
