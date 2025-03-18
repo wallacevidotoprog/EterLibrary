@@ -28,7 +28,7 @@ namespace EterLibrary.Infrastructure
 				}
 				else
 				{
-					entity.CREATE_AT = entity.CREATE_AT;
+					//entity.CREATE_AT = entity.CREATE_AT;
 					entity.UPDATE_AT = DateTime.Now;
 				}
 			}
